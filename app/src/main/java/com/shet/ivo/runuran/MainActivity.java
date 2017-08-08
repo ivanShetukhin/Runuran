@@ -1,6 +1,7 @@
 package com.shet.ivo.runuran;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -38,11 +39,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setElements();                                  //set elements activity_main
         setListenerToButtons();                         //set listeners to screen button
-
-
         //search have ran distance
         list_of_ran_distance = getSharedPreferences("distance", MODE_PRIVATE);
-        refreshDistanceRan(null);
+        try
+        {
+            refreshDistanceRan(null);
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "ERROR");
+        }
+
     }
     //set elements
     private void setElements()
@@ -72,16 +79,30 @@ public class MainActivity extends AppCompatActivity {
     private void refreshDistanceRan(String new_distance)
     {
         //get shared preference
-        String[] distance_list = list_of_ran_distance.getAll().keySet().toArray(new String[]);
+        String[] distance_list = list_of_ran_distance.getAll().keySet().toArray(new String[0]);
         if (new_distance != null)
         {
-            makeDistanceGUI(new_distance, Arrays.binarySearch(distance_list, new_distance));
+            try
+            {
+                makeDistanceGUI(new_distance, Arrays.binarySearch(distance_list, new_distance));
+            }
+            catch (Exception e)
+            {
+                Log.i(TAG, "makeDistanceGUI");
+            }
         }
         else
         {
-            for (int index = 0; index < distance_list.length; ++index)
+            try
             {
-                makeDistanceGUI(distance_list[index], index);
+                for (int index = 0; index < distance_list.length; ++index)
+                {
+                    makeDistanceGUI(distance_list[index], index);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.i(TAG, "else ERROR! makeDistanceGUI");
             }
         }
     }
@@ -134,6 +155,31 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-    }
+    };
+
+    public View.OnClickListener clearButtonListener = new View.OnClickListener()
+    {
+        @Override
+        public void onClick(View v) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setTitle("hey! runner! ");
+            builder.setPositiveButton("clear!", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    clearMethod();
+                    SharedPreferences.Editor prefereneEditor = list_of_ran_distance.edit();
+                    prefereneEditor.clear();
+                    prefereneEditor.apply();
+                }
+            });
+            builder.setCancelable(true);
+            builder.setNegativeButton("cancel", null);
+            builder.setMessage("confirm");
+            AlertDialog confirmDialog = builder.create();
+            confirmDialog.show();
+        }
+    };
+
+
 
 }
